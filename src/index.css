@@ -52,7 +52,7 @@ body {
 .box {
   width: 42rem;
   max-width: 42rem;
-  background-color: var(--color-background-500);
+  background-color: #2b3035;
   border-radius: 0.9rem;
   overflow-y: scroll;
   position: relative;

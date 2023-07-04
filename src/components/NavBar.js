@@ -3,6 +3,8 @@ import { useState } from "react";
 function NavBar({ movies }) {
   const [query, setQuery] = useState("");
 
+  console.log(movies);
+
   return (
     <nav className="nav-bar">
       <div className="logo">
