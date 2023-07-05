@@ -1,8 +1,6 @@
 import { useState } from "react";
 
-function NavBar({ movies }) {
-  const [query, setQuery] = useState("");
-
+function NavBar({ movies, query, setQuery }) {
   console.log(movies);
 
   return (

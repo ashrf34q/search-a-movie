@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import NavBar from "./components/NavBar";
 import Main, { MovieList, Summary, WatchedList } from "./components/Main";
 import { Box } from "./components/Box";
+import MovieDetails from "./components/MovieDetails";
 
 const tempMovieData = [
   {
@@ -53,42 +54,62 @@ const tempWatchedData = [
 const KEY = "f76db95";
 
 export default function App() {
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState("");
 
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=jsdjhd`
-        );
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setIsLoading(true);
+          setError(false);
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          );
 
-        if (!res.ok) {
-          throw new Error("Something went wrong while fetching movies");
+          if (!res.ok) {
+            throw new Error("Something went wrong while fetching movies");
+          }
+
+          const data = await res.json();
+
+          if (data.Response === "False") {
+            throw new Error("💀 Movie not found!");
+          }
+          setMovies(data.Search);
+          setIsLoading(false);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
         }
-
-        const data = await res.json();
-
-        if (data.Response === "False") {
-          throw new Error(data.Error);
-        }
-        setMovies(data.Search);
-        setIsLoading(false);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
       }
-    }
-    fetchMovies();
-  }, []);
+
+      if (query.length < 3) {
+        setError(false);
+        setMovies([]);
+        return;
+      }
+      fetchMovies();
+    },
+    [query]
+  );
+
+  const handleSelectMovie = function (id) {
+    setSelectedId(id);
+  };
+
+  function handleClose() {
+    setSelectedId("");
+  }
 
   return (
     <>
-      <NavBar movies={movies} />
+      <NavBar movies={movies} query={query} setQuery={setQuery} />
       <Main>
         <Box>
           {isLoading && !error ? (
@@ -96,12 +117,22 @@ export default function App() {
           ) : error ? (
             <ErrorMessage message={error} />
           ) : (
-            <MovieList movies={movies} />
+            <MovieList movies={movies} onSelectMovie={handleSelectMovie} />
           )}
         </Box>
         <Box>
-          <Summary watched={watched} />
-          <WatchedList watched={watched} />
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseMovie={handleClose}
+              apiKey={KEY}
+            />
+          ) : (
+            <>
+              <Summary watched={watched} />
+              <WatchedList watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
@@ -111,7 +142,7 @@ export default function App() {
 function ErrorMessage({ message }) {
   return (
     <p className="error">
-      <span>💀 {message}</span>
+      <span>{message}</span>
     </p>
   );
 }
