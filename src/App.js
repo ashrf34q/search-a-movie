@@ -3,6 +3,7 @@ import NavBar from "./components/NavBar";
 import Main, { MovieList, Summary, WatchedList } from "./components/Main";
 import { Box } from "./components/Box";
 import MovieDetails from "./components/MovieDetails";
+import { ErrorMessage } from "./components/ErrorMessage";
 
 const tempMovieData = [
   {
@@ -89,6 +90,7 @@ export default function App() {
         }
       }
 
+      // First check if query is more than two characters
       if (query.length < 3) {
         setError(false);
         setMovies([]);
@@ -105,6 +107,14 @@ export default function App() {
 
   function handleClose() {
     setSelectedId("");
+  }
+
+  function handleAddMovie(movie) {
+    setWatched((watched) => [...watched, movie]);
+  }
+
+  function handleDeleteWatched(id) {
+    setWatched((movies) => movies.filter((movie) => movie.imdbID !== id));
   }
 
   return (
@@ -125,25 +135,22 @@ export default function App() {
             <MovieDetails
               selectedId={selectedId}
               onCloseMovie={handleClose}
+              onAddWatched={handleAddMovie}
+              watchedList={watched}
               apiKey={KEY}
             />
           ) : (
             <>
               <Summary watched={watched} />
-              <WatchedList watched={watched} />
+              <WatchedList
+                watched={watched}
+                onDeleteMovie={handleDeleteWatched}
+              />
             </>
           )}
         </Box>
       </Main>
     </>
-  );
-}
-
-function ErrorMessage({ message }) {
-  return (
-    <p className="error">
-      <span>{message}</span>
-    </p>
   );
 }
 

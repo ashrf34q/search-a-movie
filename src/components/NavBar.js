@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 function NavBar({ movies, query, setQuery }) {
-  console.log(movies);
+  // console.log(movies);
 
   return (
     <nav className="nav-bar">

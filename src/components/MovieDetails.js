@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import StarRating from "./StarRating";
 
-function MovieDetails({ selectedId, onCloseMovie, apiKey }) {
+function MovieDetails({
+  selectedId,
+  onCloseMovie,
+  onAddWatched,
+  watchedList,
+  apiKey,
+}) {
   const [movie, setMovie] = useState({});
+  const [rating, setRating] = useState(0);
+  const [existsWatchlist, setExistsWatchlist] = useState(false);
 
   const {
     Title: title,
@@ -17,20 +25,55 @@ function MovieDetails({ selectedId, onCloseMovie, apiKey }) {
     Director: director,
   } = movie;
 
+  const checkMovieExists = function () {
+    const isWatched = watchedList
+      .map((movie) => movie.imdbID)
+      .includes(selectedId);
+
+    setExistsWatchlist(isWatched);
+  };
+
   useEffect(
     function () {
       async function getMovieDetails() {
+        // Reset rating
+        setRating(0);
+
+        setExistsWatchlist(false);
+
+        // Check if movie exists
+        checkMovieExists();
+
         const res = await fetch(
           `http://www.omdbapi.com/?apikey=${apiKey}&i=${selectedId}`
         );
         const data = await res.json();
-        console.log(data);
+        // console.log(data);
         setMovie(data);
       }
       getMovieDetails();
     },
     [selectedId]
   );
+
+  function handleAdd() {
+    const newWatchedMovie = {
+      imdbID: selectedId,
+      title,
+      year,
+      poster,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runtime.split(" ").at(0)),
+      userRating: rating,
+    };
+    onAddWatched(newWatchedMovie);
+    onCloseMovie();
+  }
+
+  function handleRating(rating) {
+    setRating(rating);
+    // onSetRate(rating);
+  }
 
   return (
     <div className="details">
@@ -53,7 +96,20 @@ function MovieDetails({ selectedId, onCloseMovie, apiKey }) {
       </header>
       <section>
         <div className="rating">
-          <StarRating maxRating={10} size={24} />
+          {!existsWatchlist && (
+            <StarRating
+              maxRating={10}
+              size={24}
+              onSetRating={handleRating}
+              rating={rating}
+            />
+          )}
+          {rating > 0 && !existsWatchlist && (
+            <button className="btn-add" onClick={handleAdd}>
+              + Add to list
+            </button>
+          )}
+          {existsWatchlist && <p>✅ Exists your watchlist</p>}
         </div>
         <p>
           <em>{plot}</em>
