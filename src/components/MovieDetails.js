@@ -35,6 +35,23 @@ function MovieDetails({
 
   useEffect(
     function () {
+      const callback = (e) => {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      };
+
+      document.addEventListener("keydown", callback);
+
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onCloseMovie]
+  );
+
+  useEffect(
+    function () {
       async function getMovieDetails() {
         // Reset rating
         setRating(0);
@@ -54,6 +71,20 @@ function MovieDetails({
       getMovieDetails();
     },
     [selectedId]
+  );
+
+  useEffect(
+    function () {
+      if (!movie) return null;
+      document.title = `Movie | ${title}`;
+
+      // Cleanup function
+      return function () {
+        document.title = "Search-a-Movie";
+        console.log(`Cleanup effect for ${title}`);
+      };
+    },
+    [movie]
   );
 
   function handleAdd() {
