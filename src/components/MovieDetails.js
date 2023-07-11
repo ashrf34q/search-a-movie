@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 
 function MovieDetails({
@@ -11,6 +11,17 @@ function MovieDetails({
   const [movie, setMovie] = useState({});
   const [rating, setRating] = useState(0);
   const [existsWatchlist, setExistsWatchlist] = useState(false);
+
+  const countRef = useRef(0);
+
+  useEffect(
+    function () {
+      if (rating) {
+        countRef.current = countRef.current + 1;
+      }
+    },
+    [rating]
+  );
 
   const {
     Title: title,
@@ -70,7 +81,7 @@ function MovieDetails({
       }
       getMovieDetails();
     },
-    [selectedId]
+    [selectedId, apiKey]
   );
 
   useEffect(
@@ -84,7 +95,7 @@ function MovieDetails({
         console.log(`Cleanup effect for ${title}`);
       };
     },
-    [movie]
+    [movie, title]
   );
 
   function handleAdd() {
@@ -96,6 +107,7 @@ function MovieDetails({
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
       userRating: rating,
+      countRating: countRef.current,
     };
     onAddWatched(newWatchedMovie);
     onCloseMovie();
