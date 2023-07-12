@@ -4,6 +4,8 @@ import Main, { MovieList, Summary, WatchedList } from "./components/Main";
 import { Box } from "./components/Box";
 import MovieDetails from "./components/MovieDetails";
 import { ErrorMessage } from "./components/ErrorMessage";
+import { useMovies } from "./useMovies";
+import { useLocalStorageState } from "./useLocalStorageState";
 
 const tempMovieData = [
   {
@@ -52,63 +54,16 @@ const tempWatchedData = [
   },
 ];
 
-const KEY = "f76db95";
-
 export default function App() {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState("");
 
   // useEffect is called an escape hatch internally by react devs
 
-  useEffect(
-    function () {
-      const controller = new AbortController();
-
-      async function fetchMovies() {
-        try {
-          setIsLoading(true);
-          setError(false);
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-            { signal: controller.signal }
-          );
-
-          if (!res.ok) {
-            throw new Error("Something went wrong while fetching movies");
-          }
-
-          const data = await res.json();
-
-          if (data.Response === "False") {
-            throw new Error("Movie not found!");
-          }
-          setMovies(data.Search);
-          setIsLoading(false);
-          setError("");
-        } catch (err) {
-          if (err.name !== "AbortError") setError(err.message);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      // First check if query is more than two characters
-      if (query.length < 3) {
-        setError(false);
-        setMovies([]);
-        return;
-      }
-      fetchMovies();
-
-      return function () {
-        controller.abort();
-      };
-    },
-    [query]
+  const { movies, error, isLoading } = useMovies(query, handleClose);
+  const { value: watched, setValue: setWatched } = useLocalStorageState(
+    [],
+    "watched"
   );
 
   const handleSelectMovie = function (id) {
@@ -126,6 +81,13 @@ export default function App() {
   function handleDeleteWatched(id) {
     setWatched((movies) => movies.filter((movie) => movie.imdbID !== id));
   }
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   return (
     <>
@@ -147,7 +109,6 @@ export default function App() {
               onCloseMovie={handleClose}
               onAddWatched={handleAddMovie}
               watchedList={watched}
-              apiKey={KEY}
             />
           ) : (
             <>

@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 
-function MovieDetails({
-  selectedId,
-  onCloseMovie,
-  onAddWatched,
-  watchedList,
-  apiKey,
-}) {
+const apiKey = "f76db95";
+
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watchedList }) {
   const [movie, setMovie] = useState({});
   const [rating, setRating] = useState(0);
   const [existsWatchlist, setExistsWatchlist] = useState(false);
