@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
+import { useKey } from "../customhooks/useKey";
 
 const apiKey = "f76db95";
 
@@ -18,6 +19,8 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watchedList }) {
     },
     [rating]
   );
+
+  useKey("Escape", onCloseMovie);
 
   const {
     Title: title,
@@ -39,23 +42,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watchedList }) {
 
     setExistsWatchlist(isWatched);
   };
-
-  useEffect(
-    function () {
-      const callback = (e) => {
-        if (e.code === "Escape") {
-          onCloseMovie();
-        }
-      };
-
-      document.addEventListener("keydown", callback);
-
-      return function () {
-        document.removeEventListener("keydown", callback);
-      };
-    },
-    [onCloseMovie]
-  );
 
   useEffect(
     function () {

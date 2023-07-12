@@ -4,8 +4,8 @@ import Main, { MovieList, Summary, WatchedList } from "./components/Main";
 import { Box } from "./components/Box";
 import MovieDetails from "./components/MovieDetails";
 import { ErrorMessage } from "./components/ErrorMessage";
-import { useMovies } from "./useMovies";
-import { useLocalStorageState } from "./useLocalStorageState";
+import { useMovies } from "./customhooks/useMovies";
+import { useLocalStorageState } from "./customhooks/useLocalStorageState";
 
 const tempMovieData = [
   {
